@@ -1,0 +1,17 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _('Reports') }}{% endblock %}
+
+{% block primary %}
+  <article class="module">
+    <div class="module-content">
+      <div class="report-content">
+        {% block primary_content %}
+        {% endblock %}
+      </div>
+    </div>
+  </article>
+{% endblock %}
+
+{% block secondary %}{% endblock %}
+

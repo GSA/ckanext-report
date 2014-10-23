@@ -16,7 +16,7 @@
       </tr>
     </thead>
     <tbody>
-      <py:for each="row in c.data['table']">
+    <py:for each="row in c.data['table']">
         <tr>
           <td>
             <a href="${h.url_for(controller='package', action='view', id=row['name'])}">
@@ -24,8 +24,8 @@
             </a>
           </td>
           <td>${row['notes']}</td>
-          <td>${h.linked_user(row['user'])}</td>
-          <td>${h.render_datetime(row['created'])}</td>
+          <td></td>
+          <td>${h.report__render_datetime(row['created'])}</td>
         </tr>
       </py:for>
     </tbody>

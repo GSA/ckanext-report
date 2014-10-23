@@ -1,8 +1,10 @@
 import datetime
-import json
+#import json as j1
+from ckan.lib.helpers import json as j1
 
 import ckan.plugins.toolkit as t
-import ckanext.dgu.lib.helpers as dguhelpers
+#import ckanext.dgu.lib.helpers as dguhelpers
+import ckanext.report.helpers as dguhelpers
 from ckanext.report.report_registry import ReportRegistry
 from ckan.lib.render import TemplateNotFound
 from ckanext.report.json import DateTimeJsonEncoder
@@ -28,16 +30,16 @@ class ReportController(t.BaseController):
         # ensure correct url is being used
         if 'organization' in t.request.environ['pylons.routes_dict'] and \
             'organization' not in report.option_defaults:
-                t.redirect_to(dguhelpers.relative_url_for(organization=None))
+                t.redirect_to(dguhelpers.dgu_relative_url_for(organization=None))
         elif 'organization' not in t.request.environ['pylons.routes_dict'] and\
             'organization' in report.option_defaults and \
             report.option_defaults['organization']:
                 org = report.option_defaults['organization']
-                t.redirect_to(dguhelpers.relative_url_for(organization=org))
+                t.redirect_to(dguhelpers.dgu_relative_url_for(organization=org))
         if 'organization' in t.request.params:
             # organization should only be in the url - let the param overwrite
             # the url.
-            t.redirect_to(dguhelpers.relative_url_for())
+            t.redirect_to(dguhelpers.dgu_relative_url_for())
 
         # options
         c.options = report.add_defaults_to_options(t.request.params)
@@ -77,7 +79,7 @@ class ReportController(t.BaseController):
             c.options.pop('refresh')
             report.refresh_cache(c.options)
             # Don't want the refresh=1 in the url once it is done
-            t.redirect_to(dguhelpers.relative_url_for(refresh=None))
+            t.redirect_to(dguhelpers.dgu_relative_url_for(refresh=None))
 
         # Check for any options not allowed by the report
         for key in c.options:
@@ -96,11 +98,13 @@ class ReportController(t.BaseController):
                 filename = 'report_%s.csv' % report.generate_key(c.options).replace('?', '_')
                 t.response.headers['Content-Type'] = 'application/csv'
                 t.response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))
-                return make_csv_from_dicts(c.data['table'])
+		for data in c.data:
+                  return make_csv_from_dicts(data['table'])
             elif format == 'json':
                 t.response.headers['Content-Type'] = 'application/json'
-                c.data['generated_at'] = c.report_date
-                return json.dumps(c.data, cls=DateTimeJsonEncoder)
+                for data in c.data:
+	  	  data['generated_at'] = c.report_date
+                  return j1.dumps(c.data, cls=DateTimeJsonEncoder)
             else:
                 t.abort(400, 'Format not known - try html, json or csv')
 
@@ -155,10 +159,12 @@ def make_csv_from_dicts(rows):
     return csvout.read()
 
 
-def ensure_data_is_dicts(data):
+def ensure_data_is_dicts(dataDict):
     '''Ensure that the data is a list of dicts, rather than a list of tuples
     with column names, as sometimes is the case. Changes it in place'''
-    if data['table'] and isinstance(data['table'][0], (list, tuple)):
+    for data in dataDict:
+      print data
+      if data['table'] and isinstance(data['table'][0], (list, tuple)):
         new_data = []
         columns = data['columns']
         for row in data['table']:
@@ -167,11 +173,12 @@ def ensure_data_is_dicts(data):
         del data['columns']
 
 
-def anonymise_user_names(data, organization=None):
+def anonymise_user_names(dataDict, organization=None):
     '''Ensure any columns with names in are anonymised, unless the current user
     has privileges.'''
-    column_names = data['table'][0].keys() if data['table'] else []
-    for col in column_names:
+    for data in dataDict:
+      column_names = data['table'][0].keys() if data['table'] else []
+      for col in column_names:
         if col.lower() in ('user', 'username', 'user name', 'author'):
             for row in data['table']:
                 row[col] = dguhelpers.user_link_info(row[col],

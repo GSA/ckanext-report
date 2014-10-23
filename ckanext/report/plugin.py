@@ -23,6 +23,7 @@ class ReportPlugin(p.SingletonPlugin):
 
     def update_config(self, config):
         p.toolkit.add_template_directory(config, 'templates')
+	p.toolkit.add_public_directory(config, 'public')
 
     # ITemplateHelpers
 
@@ -31,6 +32,9 @@ class ReportPlugin(p.SingletonPlugin):
         return {
             'report__relative_url_for': h.relative_url_for,
             'report__chunks': h.chunks,
+	    'report__organization_list': h.organization_list,
+	    'report__is_sysadmin': h.is_sysadmin,
+	    'report__render_datetime': h.render_datetime,
             }
 
 
@@ -46,4 +50,12 @@ class TaglessReportPlugin(p.SingletonPlugin):
     def register_reports(self):
         import reports
         return [reports.tagless_report_info]
+
+class BrokenLinkReportPlugin(p.SingletonPlugin):
+    
+    p.implements(IReport)
+
+    def register_reports(self):
+        import reports
+        return [reports.broken_link_info]
 

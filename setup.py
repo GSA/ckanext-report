@@ -25,6 +25,7 @@ setup(
         [ckan.plugins]
         report = ckanext.report.plugin:ReportPlugin
         tagless_report = ckanext.report.plugin:TaglessReportPlugin
+	broken_link_report = ckanext.report.plugin:BrokenLinkReportPlugin
 
         [paste.paster_command]
         report = ckanext.report.command:ReportCommand

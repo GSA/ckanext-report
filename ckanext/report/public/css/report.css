@@ -1,0 +1,20 @@
+table.tablesorter thead th.headerSortUp {
+	background-image:url('/images/sort-asc.gif');
+	background-color:#eee;
+}
+
+table.tablesorter thead th.headerSortDown {
+	background-image:url('/images/sort-desc.gif');
+	background-color:#eee;
+}
+
+table.tablesorter th.header {
+	background-image:url('/images/sort.gif');
+	cursor:pointer;
+	font-weight:bold;background-repeat:no-repeat;
+	background-position:center right;
+	padding:3px 9px;
+	padding-right:20px;
+	border-right:1px solid #dad9c7;
+	margin-left:-1px;
+}

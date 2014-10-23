@@ -1,0 +1,33 @@
+{% for record in resultData %}
+{% if record.num_packages %}
+<ul>
+    <li>Broken datasets: {{ record.total_brkn_dataset }} / {{ record.num_packages }} ({{ '%0.2f' % ((record.total_brkn_dataset/record.num_packages) * 100)|float }} %) </li>
+    <li>Broken links: {{ record.total_brkn_link }} / {{ record.num_res }} ({{ '%0.2f' % ((record.total_brkn_link/record.num_res) * 100)|float }} %) </li>
+</ul>
+
+<table class="table table-bordered table-condensed tablesorter" id="report-table" style="width: 100%; table-layout:fixed; margin-top: 8px;">
+    <thead>
+      <tr>
+        <th>Publisher</th>
+        <th>Datasets with broken links</th>
+        <th>Broken links</th>
+        <th>% Broken links</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in record.table %}
+        <tr>
+          <td>
+            <!--<a href="{{ h.url_for('report', report_name=report_name, organization=row.grp_name)}}"> -->
+              {{ row.grp_title }}
+            <!--</a>-->
+          </td>
+          <td>{{ row.dataset_count }} </td>
+          <td>{{ row.broken_link_count }}</td>
+          <td>{{ row.per_broken_link }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endfor %}

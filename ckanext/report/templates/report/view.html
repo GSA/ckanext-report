@@ -1,21 +1,15 @@
-<html xmlns:py="http://genshi.edgewall.org/"
-  xmlns:i18n="http://genshi.edgewall.org/i18n"
-  xmlns:xi="http://www.w3.org/2001/XInclude"
-  py:strip="">
+{% extends "report/base.html" %}
 
-  <py:def function="page_title">${c.report_title} - Report</py:def>
-  <py:match path="breadcrumbs">
-    <li><a href="${h.url_for('reports')}">Reports</a></li>
-    <li><a href="${request.url}">${c.report_title}</a></li>
-  </py:match>
+{% block primary_content %}
 
-  <div py:match="content" py:strip="">
-      <h1>${c.report_title}</h1>
-      <p>${c.report_description}</p>
+  <div>
+      <h1>{{ c.report_title }}</h1>
+      <p>{{ c.report_description }}</p>
       <p>
-          Generated: ${h.render_datetime(c.report_date, '%d/%m/%Y %H:%M')}
+          Generated: {{h.render_datetime(c.report_date, '%m/%d/%Y %H:%M')}}
       </p>
-      <div py:if="h.is_sysadmin()" class="panel panel-info" style="width=700px">
+      {% if h.report__is_sysadmin() == True %}
+      <div class="panel panel-info" style="width=700px">
           <div class="panel-heading"><strong>Refresh report</strong></div>
           <div class="panel-body">
             <form action="" method="POST">
@@ -24,54 +18,35 @@
             <p>As a system administrator you are able to refresh this report on demand by clicking the 'Refresh' button.</p>
           </div>
       </div>
-
-      <h3>Options</h3>
-      <form action="">
-          <div py:for="(key, value) in c.options.items()">
-            <py:if test="key in c.options_html">${c.options_html[key]}</py:if>
-            <py:if test="key not in c.options_html">
-              ${key}: ${value}
-              <input type="hidden" name="${key}" value="${value}"/>
-            </py:if>
-          </div>
-      </form>
+      {% endif %}
 
       <h3>Results</h3>
-      <py:if test="not c.are_some_results">
-        <p>No results found.</p>
-      </py:if>
-
-      <py:if test="c.are_some_results">
-        <div class="pull-right">
-            Download:
-            <a class="btn btn-primary" href="${h.report__relative_url_for(format='csv')}">CSV</a>
-            <a class="btn btn-primary" href="${h.report__relative_url_for(format='json')}">JSON</a>
-        </div>
-        <div>
-          ${c.report_snippet}
-        </div>
-      </py:if>
+      {% if not c.are_some_results %}
+         <p>No results found.</p>
+      {% endif %}
+	  
+      {% if c.are_some_results %}
+         <div class="pull-right">
+             Download:
+             <a class="btn btn-primary" href="{{h.report__relative_url_for(format='csv')}}">CSV</a>
+             <a class="btn btn-primary" href="{{h.report__relative_url_for(format='json')}}">JSON</a>
+         </div>
+         <div>
+           {{c.report_snippet}}
+         </div>
+      {% endif %}
   </div>
+  
+  {% snippet "report/" + c.report_name + ".html", resultData=c.data, report_name = c.report_name  %}
 
-  <py:def function="optional_footer">
-    <!--! Tablesorter allows table sorting by clicking on each column -->
-    <script type="text/javascript" src="/scripts/vendor/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript">
+  <link type="text/css" rel="stylesheet" media="all" href="/css/report.css" />
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+  <script src="/scripts/vendor/jquery.tablesorter.js" type="text/javascript"></script>
+  <script type="text/javascript">
       //<![CDATA[
-      $(document).ready(function()
-        {
-          $("#report-table").tablesorter({
-              dateFormat: "uk",
-          });
-          $(".js-auto-submit").change(function () {
-              $(this).closest("form").submit();
-          });
-        }
-      );
+          $("#report-table").tablesorter();
     // ]]>
-    </script>
-  </py:def>
+  </script>
 
-  <xi:include href="../layout_base.html" />
-
-</html>
+{% endblock %}
