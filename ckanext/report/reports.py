@@ -6,7 +6,7 @@ from ckan import model
 from ckan.lib.helpers import OrderedDict
 from ckanext.report import lib
 from sqlalchemy import func
-from array import *
+from sqlalchemy import or_
 
 def tagless_report(organization, include_sub_organizations=False):
     '''
@@ -88,7 +88,10 @@ def broken_link_report(organization, include_sub_organizations=False):
              .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
              .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
              .filter(model.Group.is_organization == True) \
-             .filter(model.TaskStatus.value == 'License not open') \
+	     .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
+                         model.TaskStatus.value == 'Connection timed out after 30s', \
+                         model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                         model.TaskStatus.value == 'Could not make HEAD request')) \
              .filter(model.Package.state == 'active') \
              .filter(model.Resource.state == 'active') \
              .filter(model.ResourceGroup.state == 'active') \
