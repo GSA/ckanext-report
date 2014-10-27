@@ -90,11 +90,11 @@ def broken_link_report(organization, include_sub_organizations=False):
              .filter(model.Group.is_organization == True) \
              .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
                          model.TaskStatus.value == 'Connection timed out after 30s', \
-                         model.TaskStatus.value == 'Invalid URL'\
-                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400'\
-                         model.TaskStatus.value == 'Server returned error: Internal server error on the remote server'\
-                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403'\
-                         model.TaskStatus.value == 'Server returned error: Service unavailable'\
+                         model.TaskStatus.value == 'Invalid URL',\
+                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
+                         model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
+                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
+                         model.TaskStatus.value == 'Server returned error: Service unavailable',\
                          model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
                          model.TaskStatus.value == 'Could not make HEAD request')) \
              .filter(model.Package.state == 'active') \
