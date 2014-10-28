@@ -11,14 +11,14 @@
 		{% elif i%2 == 0 %}	
 		    <div class="clearfix visible-sm"></div>
 		{% endif %}
-	        <div class="col-lg-3 col-md-4 col-sm-6">
+	        <div class="media-grid masonry" style="width:25%;margin:0px;border:1px;padding-bottom:0px;">
 	          <div class="report-summary">
 		      <a href="{{ h.url_for('report', report_name=c.reports[i].name) }}" class="report-header">
 	                <div class="report-title">{{ c.reports[i].title }}</div>
 	              </a>
 	              <div class="report-body">
 	                <div class="report-description">{{ c.reports[i].description }}</div>
-	                <div class="clearfix clearfix-ie7"> &nbsp;</div>
+	                <div class="clearfix clearfix-ie7"> &nbsp;</div><br clear="all" />
 	                <a class="view-report-link" href="{{ h.url_for('report', report_name=c.reports[i].name) }}">
 	                  View Report
 	                </a>
