@@ -18,3 +18,43 @@ table.tablesorter th.header {
 	border-right:1px solid #dad9c7;
 	margin-left:-1px;
 }
+.report-summary {
+  border-left: medium none;
+  border-radius: 3px;
+  min-height: 310px;
+  padding: 0;
+  position: relative;
+}
+
+
+.report-summary .report-title {
+  border-radius: 3px;
+  border-right-width: 0;
+  border-top-width: 39px;
+  color: #393939;
+  font-size: 17px;
+  line-height: 22px;
+  padding: 10px 14px;
+}
+
+.report-summary .report-body {
+  border-right: 0 none;
+  color: #999;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 0 14px 10px;
+}
+.report-summary .report-description {
+  margin-bottom: 25px;
+}
+.report-summary .view-report-link {
+  border-top: 1px solid #FFF;
+  bottom: 0;
+  color: #000;
+  display: block;
+  left: 0;
+  padding: 10px 22px 11px 0;
+  position: absolute;
+  right: 0;
+  text-align: right;
+}
