@@ -48,7 +48,7 @@ table.tablesorter th.header {
   margin-bottom: 25px;
 }
 .report-summary .view-report-link {
-  border-top: 1px solid #FFF;
+  border-top: 1px solid #ccc;
   bottom: 0;
   color: #000;
   display: block;

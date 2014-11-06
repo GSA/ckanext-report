@@ -2,7 +2,7 @@
 
 {% block primary_content %}
     <div class="dataset">
-	 <div class="row">
+	 <div class="row" style="margin-left:0px;">
 	     {% for i in range(c.reports|length) %}
 	       	{% if i%4 == 0 %}
 		    <div class="clearfix visible-lg"></div>
@@ -11,7 +11,7 @@
 		{% elif i%2 == 0 %}	
 		    <div class="clearfix visible-sm"></div>
 		{% endif %}
-	        <div class="media-grid masonry" style="width:25%;margin:0px;border:1px;padding-bottom:0px;">
+	        <div class="media-grid masonry" style="background:#fff;width:25%;margin:0px;border:1px solid #ccc;padding-bottom:0px;">
 	          <div class="report-summary">
 		      <a href="{{ h.url_for('report', report_name=c.reports[i].name) }}" class="report-header">
 	                <div class="report-title">{{ c.reports[i].title }}</div>
