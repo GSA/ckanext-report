@@ -19,6 +19,11 @@
           </div>
       </div>
       {% endif %}
+	  
+	  <h3>Options</h3>
+	      <form action="">
+	  		{% snippet "report/option_organization.html", selected_org = c.options['organization'] %}
+	  	  </form>
 
       <h3>Results</h3>
       {% if not c.are_some_results %}
@@ -37,7 +42,8 @@
       {% endif %}
   </div>
   
-  {% snippet "report/" + c.report_name + ".html", resultData=c.data, report_name = c.report_name  %}
+
+  {% snippet "report/" + c.report_name + ".html", resultData=c.data, report_name = c.report_name, selected_org = c.options['organization']  %}
 
   <link type="text/css" rel="stylesheet" media="all" href="/css/report.css" />
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -46,6 +52,9 @@
   <script type="text/javascript">
       //<![CDATA[
           $("#report-table").tablesorter();
+		  $(".js-auto-submit").change(function () {
+		       $(this).closest("form").submit();
+		   });
     // ]]>
   </script>
 

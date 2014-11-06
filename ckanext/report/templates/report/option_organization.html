@@ -1,9 +1,13 @@
-<span class="form-select control-group control-organization">
-    <label for="option-organization"> {{ _('Publisher:') }} </label>
-    <select id="option-organization" name="organization" class="inline js-auto-submit">
-    	<option value="">{{ _('Index of all publishers') }}</option>
-	{% for org_name, org_title in h.report__organization_list() %}
-	    <option value="{{org_name}}"> {{org_title}} </option>
-	{% endfor %}
-    </select>          
-</span>
+<div>
+    <label for="option-organization"> {{ _('Organization') }} </label>
+      <select id="option-organization" name="organization" class="inline js-auto-submit">
+          <option value="">{{ _('Index of all publishers') }}</option>
+	      {% for org_name, org_title in h.report__organization_list() %}
+		    {% if selected_org == org_name %}
+	           <option value="{{org_name}}" selected="selected"> {{org_title}} </option>
+			{% else %}
+			   <option value="{{org_name}}"> {{org_title}} </option>
+			{% endif %}
+	      {% endfor %}
+        </select>     
+</div>

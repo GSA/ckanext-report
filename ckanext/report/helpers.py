@@ -1,6 +1,9 @@
 import ckan.plugins as p
 import ckan.lib.helpers
 from pylons import request
+from ckan import model
+from sqlalchemy import or_
+from ckan.lib.helpers import OrderedDict
 import ckan.plugins.toolkit as t
 c = t.c
 
@@ -99,7 +102,6 @@ def user_link_info(user_name, organisation=None):  # Overwrite h.linked_user
 
 
 def organization_list():
-    from ckan import model
     organizations = model.Session.query(model.Group).\
         filter(model.Group.type=='organization').\
         filter(model.Group.state=='active').order_by('title')
@@ -127,3 +129,48 @@ def render_datetime(datetime_, date_format=None, with_hours=False):
         if with_hours:
             date_format += ' %H:%M'
     return ckan.lib.helpers.render_datetime(datetime_, date_format)
+
+def broken_dataset_list(org):
+    '''Query Db to find broken dataset list for given organization.'''
+    
+    sql = model.Session.query(model.Package.name, model.Package.title, model.Resource.id, model.Resource.position, model.Resource.url, model.TaskStatus.value, model.TaskStatus.entity_id) \
+             .join(model.Group, model.Group.id == model.Package.owner_org) \
+             .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
+             .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+             .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
+             .filter(model.Group.is_organization == True) \
+             .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
+                         model.TaskStatus.value == 'Connection timed out after 30s', \
+                         model.TaskStatus.value == 'Invalid URL',\
+                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
+                         model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
+                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
+                         model.TaskStatus.value == 'Server returned error: Service unavailable',\
+                         model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                         model.TaskStatus.value == 'Could not make HEAD request')) \
+             .filter(model.Package.state == 'active') \
+             .filter(model.Resource.state == 'active') \
+             .filter(model.ResourceGroup.state == 'active') \
+             .filter(model.Group.state == 'active') \
+			 .filter(model.Group.name == org)
+	
+   
+    dataset_list = [] 
+    for row in sql:
+       q = model.Session.query(model.TaskStatus.value) \
+               .filter(model.TaskStatus.key == 'openness_score_failure_count') \
+               .filter(model.TaskStatus.entity_id == row.entity_id)
+               
+       dataset_list.append( {
+                            'name': row.name,
+                            'title': row.title,
+                            'res_id': row.id,
+                            'res_pos': row.position,
+                            'res_url': row.url,
+                            'reason': row.value,
+                            'num_fail': q.first().value,
+                            })
+       
+    
+    for dataset in dataset_list:
+       yield (dataset)

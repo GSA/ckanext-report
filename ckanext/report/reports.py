@@ -26,9 +26,9 @@ def tagless_report(organization, include_sub_organizations=False):
     q = model.Session.query(model.Package) \
              .outerjoin(model.PackageTag) \
              .filter(model.PackageTag.id == None)
-    if organization:
+    '''if organization:
         q = lib.filter_by_organizations(q, organization,
-                                        include_sub_organizations)
+                                        include_sub_organizations)'''
     tagless_pkgs = [OrderedDict((
             ('name', pkg.name),
             ('title', pkg.title),
@@ -158,9 +158,9 @@ def broken_link_report(organization, include_sub_organizations=False):
 
 def report_option_combinations():
     for organization in lib.all_organizations(include_none=True):
-        for include_sub_organizations in (False, True):
             yield {'organization': organization,
-                   'include_sub_organizations': include_sub_organizations}
+                   'include_sub_organizations': False
+                  }
 
 tagless_report_info = {
     'name': 'tagless-datasets',

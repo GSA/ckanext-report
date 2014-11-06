@@ -6,6 +6,7 @@
 </ul>
 
 <table class="table table-bordered table-condensed tablesorter" id="report-table" style="width: 100%; table-layout:fixed; margin-top: 8px;">
+	{% if not selected_org %}
     <thead>
       <tr>
         <th>Organization</th>
@@ -18,9 +19,9 @@
       {% for row in record.table %}
         <tr>
           <td>
-            <!--<a href="{{ h.url_for('report', report_name=report_name, organization=row.grp_name)}}"> -->
+            <a href="{{ h.url_for('report', report_name=report_name, organization=row.grp_name)}}"> 
               {{ row.grp_title }}
-            <!--</a>-->
+            </a>
           </td>
           <td>{{ row.dataset_count }} </td>
           <td>{{ row.broken_link_count }}</td>
@@ -28,6 +29,34 @@
         </tr>
       {% endfor %}
     </tbody>
+	{% else %}
+	<thead>
+	    <tr class="js-tooltip" style="letter-spacing: -1px; font-size: 13px;" data-original-title="" title="">
+	      <th style="width: 100px" class="header">Dataset</th>
+	      <th style="width: 30px" title="Index/position of the resource in the dataset" class="header">Res</th>
+	      <th style="width: 190px" class="header">URL</th>
+	      <th style="width: 120px" class="header">Reason</th>
+	      <th style="width: 25px" title="Failed download attempts" class="header">No. of fails</th>
+	    </tr>
+	</thead>
+	<tbody>
+	 	{% for row in  h.report__broken_dataset_list(selected_org) %}
+	     	<tr>
+				<td> 
+					<a href="{{h.url_for(controller='package', action='read', id=row.name)}}"> {{ row.title }} </a>
+				</td>
+				<td> 
+					<a href="{{h.url_for(controller='package', action='resource_read', id=row.name, resource_id=row.res_id)}}"> {{ row.res_pos }} </a>
+				</td>
+				<td>
+					<a href="{{row.res_url}}">{{ row.res_url }}</a>
+				</td>
+				<td>{{ row.reason }}</td>
+				<td>{{ row.num_fail }}</td>
+			</tr>
+	 	{% endfor %}
+	</tbody>
+	{% endif %}
 </table>
 {% endif %}
 {% endfor %}

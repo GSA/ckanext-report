@@ -32,9 +32,10 @@ class ReportPlugin(p.SingletonPlugin):
         return {
             'report__relative_url_for': h.relative_url_for,
             'report__chunks': h.chunks,
-	    'report__organization_list': h.organization_list,
-	    'report__is_sysadmin': h.is_sysadmin,
-	    'report__render_datetime': h.render_datetime,
+            'report__organization_list': h.organization_list,
+            'report__is_sysadmin': h.is_sysadmin,
+            'report__render_datetime': h.render_datetime,
+            'report__broken_dataset_list': h.broken_dataset_list,
             }
 
 

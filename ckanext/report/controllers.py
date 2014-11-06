@@ -51,13 +51,13 @@ class ReportController(t.BaseController):
             c.options['organization'] = organization
             c.offer_organization_index = \
                 report.option_defaults['organization'] is None
-        c.options_html = {}
+        '''c.options_html = {}
         for option in c.options:
             try:
                 c.options_html[option] = \
                     t.render_snippet('report/option_%s.html' % option)
             except TemplateNotFound:
-                continue
+                continue'''
         c.report_title = report.title
         c.report_description = report.description
 
