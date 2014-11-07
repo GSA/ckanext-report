@@ -1,8 +1,8 @@
 {% for record in resultData %}
 {% if record.num_packages %}
 <ul>
-    <li>Broken datasets: {{ record.total_brkn_dataset }} / {{ record.num_packages }} ({{ '%0.2f' % ((record.total_brkn_dataset/record.num_packages) * 100)|float }} %) </li>
-    <li>Broken links: {{ record.total_brkn_link }} / {{ record.num_res }} ({{ '%0.2f' % ((record.total_brkn_link/record.num_res) * 100)|float }} %) </li>
+    <li>Broken datasets: {{ record.num_broken_packages }} / {{ record.num_packages }} ({{ record.broken_package_percent }} %) </li>
+    <li>Broken links: {{ record.num_broken_resources }} / {{ record.num_resources }} ({{ record.broken_resource_percent }} %) </li>
 </ul>
 
 <table class="table table-bordered table-condensed tablesorter" id="report-table" style="width: 100%; table-layout:fixed; margin-top: 8px;">
@@ -19,13 +19,13 @@
       {% for row in record.table %}
         <tr>
           <td>
-            <a href="{{ h.url_for('report', report_name=report_name, organization=row.grp_name)}}"> 
-              {{ row.grp_title }}
+            <a href="{{ h.url_for('report', report_name=report_name, organization=row.organization_name)}}"> 
+              {{ row.organization_title }}
             </a>
           </td>
-          <td>{{ row.dataset_count }} </td>
-          <td>{{ row.broken_link_count }}</td>
-          <td>{{ row.per_broken_link }}</td>
+          <td>{{ row.broken_package_count }} </td>
+          <td>{{ row.broken_resource_count }}</td>
+          <td>{{ row.broken_resource_percent }}</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -40,19 +40,20 @@
 	    </tr>
 	</thead>
 	<tbody>
-	 	{% for row in  h.report__broken_dataset_list(selected_org) %}
+
+	 	{% for row in  record.table %}
 	     	<tr>
 				<td> 
-					<a href="{{h.url_for(controller='package', action='read', id=row.name)}}"> {{ row.title }} </a>
+					<a href="{{h.url_for(controller='package', action='read', id=row.dataset_name)}}"> {{ row.dataset_title }} </a>
 				</td>
 				<td> 
-					<a href="{{h.url_for(controller='package', action='resource_read', id=row.name, resource_id=row.res_id)}}"> {{ row.res_pos }} </a>
+					<a href="{{h.url_for(controller='package', action='resource_read', id=row.dataset_name, resource_id=row.resource_id)}}"> {{ row.resource_position }} </a>
 				</td>
 				<td>
-					<a href="{{row.res_url}}">{{ row.res_url }}</a>
+					<a href="{{row.resource_url}}">{{ row.resource_url }}</a>
 				</td>
 				<td>{{ row.reason }}</td>
-				<td>{{ row.num_fail }}</td>
+				<td>{{ row.failure_count }}</td>
 			</tr>
 	 	{% endfor %}
 	</tbody>

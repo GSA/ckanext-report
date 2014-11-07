@@ -59,79 +59,137 @@ def tagless_report(organization, include_sub_organizations=False):
 
 
 def broken_link_report(organization, include_sub_organizations=False):
-
-    grp_totals = {}
-
-    sql = model.Session.query(model.Group.name, func.count(model.Package.id.distinct()).label('total_grp_pkg_count'), \
-           func.count(model.Resource.id.distinct()).label('total_grp_res_cnt')) \
-           .join(model.Package, model.Group.id == model.Package.owner_org) \
-           .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-           .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
-           .filter(model.Group.is_organization == True) \
-           .filter(model.Package.state == 'active') \
-           .filter(model.Resource.state == 'active') \
-           .filter(model.ResourceGroup.state == 'active') \
-           .filter(model.Group.state == 'active') \
-           .group_by(model.Group.name)
-
-    for row in sql:
-        grp_totals[row.name] =  OrderedDict((
-                                        ('total_grp_pkg_count', row.total_grp_pkg_count),
-                                        ('total_grp_res_cnt', row.total_grp_res_cnt),
-                                   ))
-
-    q = model.Session.query(model.Group.name.label('grp_name'), model.Group.title.label('grp_title'),  \
-              func.count(model.Package.name.distinct()).label('dataset_cnt'), \
-              func.count(model.Group.name).label('broken_link_cnt')) \
-             .join(model.Package, model.Group.id == model.Package.owner_org) \
-             .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-             .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
-             .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
-             .filter(model.Group.is_organization == True) \
-             .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
-                         model.TaskStatus.value == 'Connection timed out after 30s', \
-                         model.TaskStatus.value == 'Invalid URL',\
-                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
-                         model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
-                         model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
-                         model.TaskStatus.value == 'Server returned error: Service unavailable',\
-                         model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
-                         model.TaskStatus.value == 'Could not make HEAD request')) \
-             .filter(model.Package.state == 'active') \
-             .filter(model.Resource.state == 'active') \
-             .filter(model.ResourceGroup.state == 'active') \
-             .filter(model.Group.state == 'active') \
-             .group_by(model.Group.name, model.Group.title) \
-             .order_by(model.Group.title)
     
+    if not organization:
+        grp_totals = {}
 
-    if organization:
-        q = lib.filter_by_organizations(q, organization,
-                                        include_sub_organizations)
+        sql = model.Session.query(model.Group.name, func.count(model.Package.id.distinct()).label('total_grp_pkg_count'), \
+               func.count(model.Resource.id.distinct()).label('total_grp_res_cnt')) \
+               .join(model.Package, model.Group.id == model.Package.owner_org) \
+               .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
+               .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+               .filter(model.Group.is_organization == True) \
+               .filter(model.Package.state == 'active') \
+               .filter(model.Resource.state == 'active') \
+               .filter(model.ResourceGroup.state == 'active') \
+               .filter(model.Group.state == 'active') \
+               .group_by(model.Group.name)
 
-    broken_links = []
+        for row in sql:
+            grp_totals[row.name] =  OrderedDict((
+                                            ('total_grp_pkg_count', row.total_grp_pkg_count),
+                                            ('total_grp_res_cnt', row.total_grp_res_cnt),
+                                       ))
 
-    for row in q:
+        broken_links = []
+        
+        q = model.Session.query(model.Group.name.label('grp_name'), model.Group.title.label('grp_title'),  \
+                  func.count(model.Package.name.distinct()).label('dataset_cnt'), \
+                  func.count(model.Group.name).label('broken_link_cnt')) \
+                 .join(model.Package, model.Group.id == model.Package.owner_org) \
+                 .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
+                 .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                 .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
+                 .filter(model.Group.is_organization == True) \
+                 .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
+                             model.TaskStatus.value == 'Connection timed out after 30s', \
+                             model.TaskStatus.value == 'Invalid URL',\
+                             model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
+                             model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
+                             model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
+                             model.TaskStatus.value == 'Server returned error: Service unavailable',\
+                             model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                             model.TaskStatus.value == 'Could not make HEAD request')) \
+                 .filter(model.Package.state == 'active') \
+                 .filter(model.Resource.state == 'active') \
+                 .filter(model.ResourceGroup.state == 'active') \
+                 .filter(model.Group.state == 'active') \
+                 .group_by(model.Group.name, model.Group.title) \
+                 .order_by(model.Group.title)
 
-      broken_links.append(OrderedDict((
-               ('grp_name', row.grp_name),
-               ('grp_title', row.grp_title),
-               ('dataset_count', row.dataset_cnt),
-               ('broken_link_count', row.broken_link_cnt),
-               ('per_broken_link', lib.percent(row.broken_link_cnt, grp_totals[row.grp_name]['total_grp_res_cnt'])),
-            )) )
+        for row in q:
+
+          broken_links.append(OrderedDict((
+                   ('organization_name', row.grp_name),
+                   ('organization_title', row.grp_title),
+                   ('broken_package_count', row.dataset_cnt),
+                   ('broken_resource_count', row.broken_link_cnt),
+                   ('broken_resource_percent', lib.percent(row.broken_link_cnt, grp_totals[row.grp_name]['total_grp_res_cnt'])),
+                   ('package_count', grp_totals[row.grp_name]['total_grp_pkg_count']),
+                   ('broken_package_percent', lib.percent(row.dataset_cnt, grp_totals[row.grp_name]['total_grp_pkg_count'])),
+                )) )
             
-    q = q.subquery()
-    q1 = model.Session.query(func.sum(q.c.dataset_cnt).label('total_brkn_dataset'), func.sum(q.c.broken_link_cnt).label('total_brkn_link')).first()
+        #if organization:
+        #    q = lib.filter_by_organizations(q, organization,
+        #                                    include_sub_organizations)        
+        
+        q = q.subquery()
+        q1 = model.Session.query(func.sum(q.c.dataset_cnt).label('total_brkn_dataset'), func.sum(q.c.broken_link_cnt).label('total_brkn_link')).first()
 
-    total_brkn_dataset = q1.total_brkn_dataset	     
-    total_brkn_link = q1.total_brkn_link
+        total_brkn_dataset = q1.total_brkn_dataset	     
+        total_brkn_link = q1.total_brkn_link
+        
+    else:
+        broken_links = []
+        sql = model.Session.query(model.Package.name, model.Package.title, model.Resource.id, model.Resource.position, model.Resource.url, model.TaskStatus.value, model.TaskStatus.entity_id) \
+                     .join(model.Group, model.Group.id == model.Package.owner_org) \
+                     .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
+                     .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                     .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
+                     .filter(model.Group.is_organization == True) \
+                     .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
+                                 model.TaskStatus.value == 'Connection timed out after 30s', \
+                                 model.TaskStatus.value == 'Invalid URL',\
+                                 model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
+                                 model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
+                                 model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
+                                 model.TaskStatus.value == 'Server returned error: Service unavailable',\
+                                 model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                                 model.TaskStatus.value == 'Could not make HEAD request')) \
+                     .filter(model.Package.state == 'active') \
+                     .filter(model.Resource.state == 'active') \
+                     .filter(model.ResourceGroup.state == 'active') \
+                     .filter(model.Group.state == 'active') \
+        			 .filter(model.Group.name == organization)
+ 
+        for row in sql:
+           q = model.Session.query(model.TaskStatus.value) \
+                   .filter(model.TaskStatus.key == 'openness_score_failure_count') \
+                   .filter(model.TaskStatus.entity_id == row.entity_id)
+               
+           '''dataset_list.append( {
+                                    'dataset_name': row.name,
+                                    'dataset_title': row.title,
+                                    'resource_id': row.id,
+                                    'resource_position': row.position,
+                                    'resource_url': row.url,
+                                    'reason': row.value,
+                                    'failure_count': q.first().value,
+                                    })'''
+                                    
+           broken_links.append(OrderedDict((
+                      ('dataset_name', row.name),
+                      ('dataset_title', row.title),
+                      ('resource_id', row.id),
+                      ('resource_position', row.position),
+                      ('resource_url', row.url),
+                      ('reason', row.value),
+                      ('failure_count', q.first().value),
+                   )) )
+                   
+        sql = sql.subquery()
+        q1 = model.Session.query(func.count(sql.c.name).label('total_brkn_dataset'), func.count(sql.c.position).label('total_brkn_link')).first()
 
-    # Number of resources and package
+        total_brkn_dataset = q1.total_brkn_dataset	     
+        total_brkn_link = q1.total_brkn_link
+          
+        
+    # Number of total resources and package
     q = model.Session.query(model.Package)\
                            .filter(model.Package.state == 'active')
 
-    q = lib.filter_by_organizations(q, organization, include_sub_organizations)
+    if organization:
+        q = lib.filter_by_organizations(q, organization, include_sub_organizations)
 
     num_packages = q.count()
 
@@ -147,11 +205,13 @@ def broken_link_report(organization, include_sub_organizations=False):
 
     resultData = []
     resultData.append( OrderedDict((
-               ('table', broken_links),
+               ('num_broken_packages', total_brkn_dataset),
                ('num_packages', num_packages),
-               ('num_res', num_res),
-               ('total_brkn_dataset', total_brkn_dataset),
-               ('total_brkn_link', total_brkn_link),
+               ('broken_package_percent', lib.percent(total_brkn_dataset, num_packages)),
+               ('num_broken_resources', total_brkn_link),
+               ('num_resources', num_res),
+               ('broken_resource_percent', lib.percent(total_brkn_link, num_res)),
+               ('table', broken_links),
                )) )
 
     return resultData

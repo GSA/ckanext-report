@@ -60,8 +60,15 @@ def dataset_notes(pkg):
 
 
 def percent(numerator, denominator):
+    if denominator == None:
+    	denominator = 0
+    
+    if numerator == None:
+       numerator = 0
+    
     if denominator == 0:
         return 100 if numerator else 0
+
     return int((numerator * 100) / denominator)
 
 
