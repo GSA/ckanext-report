@@ -1,14 +1,12 @@
 import datetime
-#import json as j1
 from ckan.lib.helpers import json as j1
-
 import ckan.plugins.toolkit as t
-#import ckanext.dgu.lib.helpers as dguhelpers
 import ckanext.report.helpers as dguhelpers
 from ckanext.report.report_registry import ReportRegistry
 from ckan.lib.render import TemplateNotFound
 from ckanext.report.json import DateTimeJsonEncoder
-from ckan.common import OrderedDict
+#from ckan.common import OrderedDict
+from ckan.lib.helpers import OrderedDict
 
 c = t.c
 
@@ -86,19 +84,33 @@ class ReportController(t.BaseController):
             t.abort(404)
 
         if format and format != 'html':
+            
             ensure_data_is_dicts(c.data)
             anonymise_user_names(c.data, organization=c.options.get('organization'))
+            
+            sorted_list = []
+            for data in c.data:
+              for row in data['table']: 
+                 temp = OrderedDict()              
+                 for k, v in sorted(row.items(), key=lambda x: data['order'].get(x[0])):
+                   temp.update({k:v})
+                 sorted_list.append(temp)  
+            
+              data['table'] = sorted_list
+              
             if format == 'csv':
                 filename = 'report_%s.csv' % report.generate_key(c.options).replace('?', '_')
                 t.response.headers['Content-Type'] = 'application/csv'
-                t.response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))
-		for data in c.data:
+                t.response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))        
+                for data in c.data:     
                   return make_csv_from_dicts(data['table'])
             elif format == 'json':
                 t.response.headers['Content-Type'] = 'application/json'
+                result = OrderedDict()
+                result['generated_at'] = c.report_date
                 for data in c.data:
-	  	  data['generated_at'] = c.report_date
-                  return j1.dumps(c.data, cls=DateTimeJsonEncoder)
+                  result['table'] = data['table']
+                return j1.dumps(result, cls=DateTimeJsonEncoder)
             else:
                 t.abort(400, 'Format not known - try html, json or csv')
 
@@ -156,8 +168,7 @@ def make_csv_from_dicts(rows):
 def ensure_data_is_dicts(dataDict):
     '''Ensure that the data is a list of dicts, rather than a list of tuples
     with column names, as sometimes is the case. Changes it in place'''
-    for data in dataDict:
-      print data
+    for data in dataDict:       
       if data['table'] and isinstance(data['table'][0], (list, tuple)):
         new_data = []
         columns = data['columns']
@@ -177,4 +188,3 @@ def anonymise_user_names(dataDict, organization=None):
             for row in data['table']:
                 row[col] = dguhelpers.user_link_info(row[col],
                               organisation=organization)[0]
-

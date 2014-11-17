@@ -7,6 +7,7 @@ from ckan.lib.helpers import OrderedDict
 from ckanext.report import lib
 from sqlalchemy import func
 from sqlalchemy import or_
+import collections
 
 def tagless_report(organization, include_sub_organizations=False):
     '''
@@ -82,6 +83,7 @@ def broken_link_report(organization, include_sub_organizations=False):
                                        ))
 
         broken_links = []
+        order = {'organization_name': 1, 'organization_title' : 2, 'broken_package_count' : 3, 'broken_resource_count' : 4, 'broken_resource_percent' : 5, 'package_count' : 6, 'broken_package_percent' : 7}
         
         q = model.Session.query(model.Group.name.label('grp_name'), model.Group.title.label('grp_title'),  \
                   func.count(model.Package.name.distinct()).label('dataset_cnt'), \
@@ -118,7 +120,7 @@ def broken_link_report(organization, include_sub_organizations=False):
                    ('package_count', grp_totals[row.grp_name]['total_grp_pkg_count']),
                    ('broken_package_percent', lib.percent(row.dataset_cnt, grp_totals[row.grp_name]['total_grp_pkg_count'])),
                 )) )
-            
+               
         #if organization:
         #    q = lib.filter_by_organizations(q, organization,
         #                                    include_sub_organizations)        
@@ -131,6 +133,8 @@ def broken_link_report(organization, include_sub_organizations=False):
         
     else:
         broken_links = []
+        order = {'dataset_name':1, 'dataset_title':2, 'resource_id':3, 'resource_position':4, 'resource_url':5, 'reason':6, 'failure_count':7}
+
         sql = model.Session.query(model.Package.name, model.Package.title, model.Resource.id, model.Resource.position, model.Resource.url, model.TaskStatus.value, model.TaskStatus.entity_id) \
                      .join(model.Group, model.Group.id == model.Package.owner_org) \
                      .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
@@ -156,16 +160,6 @@ def broken_link_report(organization, include_sub_organizations=False):
            q = model.Session.query(model.TaskStatus.value) \
                    .filter(model.TaskStatus.key == 'openness_score_failure_count') \
                    .filter(model.TaskStatus.entity_id == row.entity_id)
-               
-           '''dataset_list.append( {
-                                    'dataset_name': row.name,
-                                    'dataset_title': row.title,
-                                    'resource_id': row.id,
-                                    'resource_position': row.position,
-                                    'resource_url': row.url,
-                                    'reason': row.value,
-                                    'failure_count': q.first().value,
-                                    })'''
                                     
            broken_links.append(OrderedDict((
                       ('dataset_name', row.name),
@@ -211,16 +205,47 @@ def broken_link_report(organization, include_sub_organizations=False):
                ('num_broken_resources', total_brkn_link),
                ('num_resources', num_res),
                ('broken_resource_percent', lib.percent(total_brkn_link, num_res)),
+               ('order', order),
                ('table', broken_links),
-               )) )
+               )) )       
 
     return resultData
 
-def report_option_combinations():
+def tagless_report_option_combinations():
     for organization in lib.all_organizations(include_none=True):
             yield {'organization': organization,
                    'include_sub_organizations': False
                   }
+
+def broken_report_option_combinations():
+   sql = model.Session.query(model.Group.name.distinct().label('organization')) \
+                .join(model.Package, model.Group.id == model.Package.owner_org) \
+                .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
+                .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
+                .filter(model.Group.is_organization == True) \
+                .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
+                            model.TaskStatus.value == 'Connection timed out after 30s', \
+                            model.TaskStatus.value == 'Invalid URL',\
+                            model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
+                            model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
+                            model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
+                            model.TaskStatus.value == 'Server returned error: Service unavailable',\
+                            model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                            model.TaskStatus.value == 'Could not make HEAD request')) \
+                .filter(model.Package.state == 'active') \
+                .filter(model.Resource.state == 'active') \
+                .filter(model.ResourceGroup.state == 'active') \
+                .filter(model.Group.state == 'active')
+
+   yield {'organization': None,
+             'include_sub_organizations': False
+            }
+            
+   for row in sql:
+      yield {'organization': row.organization,
+             'include_sub_organizations': False
+            }
 
 tagless_report_info = {
     'name': 'tagless-datasets',
@@ -228,7 +253,7 @@ tagless_report_info = {
     'option_defaults': OrderedDict((('organization', None),
                                     ('include_sub_organizations', False),
                                     )),
-    'option_combinations': report_option_combinations,
+    'option_combinations': tagless_report_option_combinations,
     'generate': tagless_report,
     'template': 'report/tagless-datasets.html',
     }
@@ -240,7 +265,7 @@ broken_link_info = {
     'option_defaults': OrderedDict((('organization', None),
                                         ('include_sub_organizations', False),
                                         )),
-    'option_combinations': report_option_combinations,
+    'option_combinations': broken_report_option_combinations,
     'generate': broken_link_report,
     'template': 'report/broken-links.html',
 
