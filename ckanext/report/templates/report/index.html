@@ -1,36 +1,35 @@
 {% extends "report/base.html" %}
 
-{% block primary_content %}
-    <div class="dataset">
-	 <div class="row" style="margin-left:0px;">
-	     {% for i in range(c.reports|length) %}
-	       	{% if i%4 == 0 %}
-		    <div class="clearfix visible-lg"></div>
-		{% elif i%3 == 0 %}
-	            <div class="clearfix visible-md clearfix-ie7"></div>
-		{% elif i%2 == 0 %}	
-		    <div class="clearfix visible-sm"></div>
-		{% endif %}
-	        <div class="media-grid masonry" style="background:#fff;width:25%;margin:0px;border:1px solid #ccc;padding-bottom:0px;">
-	          <div class="report-summary">
-		      <a href="{{ h.url_for('report', report_name=c.reports[i].name) }}" class="report-header">
-	                <div class="report-title">{{ c.reports[i].title }}</div>
-	              </a>
-	              <div class="report-body">
-	                <div class="report-description">{{ c.reports[i].description }}</div>
-	                <div class="clearfix clearfix-ie7"> &nbsp;</div><br clear="all" />
-	                <a class="view-report-link" href="{{ h.url_for('report', report_name=c.reports[i].name) }}">
-	                  View Report
-	                </a>
-	              </div>
-		  </div>
-		</div>
-	     {% endfor %}
-	 </div>	 
-    </div>
+{% block title %}{{ _('Reports') }} - {{ super() }}{% endblock %}
 
-    <link type="text/css" rel="stylesheet" media="all" href="/css/report.css" />
+{% block breadcrumb_content %}
+  {{ h.build_nav('reports', _('Reports')) }}
 {% endblock %}
 
-
-
+{% block primary_content %}
+  <div class="dataset">
+    <div class="row" style="margin-left:0px;">
+      {% for report in c.reports %}
+        {% if loop.index0%4==0 %}<div class="clearfix visible-lg"></div>{% endif %}
+        {% if loop.index0%3==0 %}<div class="clearfix visible-md clearfix-ie7"></div>{% endif %}
+        {% if loop.index0%2==0 %}<div class="clearfix visible-sm"></div>{% endif %}
+        <div class="col-lg-3 col-md-4 col-sm-6 media-grid masonry" style="background:#fff;width:25%;margin:0px;border:1px solid #ccc;padding-bottom:0px;">
+          {% set report_url=h.url_for('report', report_name=report.name, **h.report__explicit_default_options(report.name)) %}
+          <div class="report-summary">
+            <a href="{{ report_url }}" class="report-header">
+              <div class="report-title">{{ report.title }}</div>
+            </a>
+            <div class="report-body">
+              <div class="report-description">{{ report.description }}</div>
+              <div class="clearfix clearfix-ie7"> &nbsp;</div>
+              <a class="view-report-link" href="{{ report_url }}">
+                {{ _('View Report') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <link type="text/css" rel="stylesheet" media="all" href="/css/report.css" />
+{% endblock%}

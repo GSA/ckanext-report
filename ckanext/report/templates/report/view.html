@@ -1,5 +1,12 @@
 {% extends "report/base.html" %}
 
+{% block title %}{{ c.report_title }} - {{ _('Reports') }} - {{ super() }}{% endblock %}
+
+{% block breadcrumb_content %}
+  {{ h.build_nav('reports', _('Reports')) }}
+  {{ h.build_nav('report-org' if '/organization' in request.environ.get('PATH_INFO', '') else 'report', c.report_title, report_name=c.report_name) }}
+{% endblock%}
+
 {% block primary_content %}
 
   <div>

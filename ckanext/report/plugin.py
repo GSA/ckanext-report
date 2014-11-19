@@ -35,6 +35,7 @@ class ReportPlugin(p.SingletonPlugin):
             'report__organization_list': h.organization_list,
             'report__is_sysadmin': h.is_sysadmin,
             'report__render_datetime': h.render_datetime,
+            'report__explicit_default_options': h.explicit_default_options,
             }
 
 

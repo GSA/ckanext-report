@@ -2,9 +2,8 @@ import ckan.plugins as p
 import ckan.lib.helpers
 from pylons import request
 from ckan import model
-from sqlalchemy import or_
-from ckan.lib.helpers import OrderedDict
 import ckan.plugins.toolkit as t
+from ckanext.report.report_registry import ReportRegistry
 c = t.c
 
 def relative_url_for(**kwargs):
@@ -130,3 +129,21 @@ def render_datetime(datetime_, date_format=None, with_hours=False):
             date_format += ' %H:%M'
     return ckan.lib.helpers.render_datetime(datetime_, date_format)
 
+
+def explicit_default_options(report_name):
+    '''Returns the options that are needed for URL parameters to load a report
+    with the default options.
+    Normally you can just load a report at /report/<name> but there is an
+    exception for checkboxes that default to True. e.g.
+    include_sub_organizations.  If you uncheck the checkbox and submit the form
+    then rather than sending you to /report/<name>?include_sub_organizations=0
+    it misses out the parameter completely. Therefore the absence of the
+    parameter must be taken to mean include_sub_organizations=0, and when we
+    want the (default) value of 1 we have to be explicit.
+    '''
+    explicit_defaults = {}
+    options = ReportRegistry.instance().get_report(report_name).option_defaults
+    for key in options:
+        if options[key] is True:
+            explicit_defaults[key] = 1
+    return explicit_defaults
