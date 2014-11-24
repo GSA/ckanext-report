@@ -1,7 +1,7 @@
 <div>
     <label for="option-organization"> {{ _('Organization') }} </label>
       <select id="option-organization" name="organization" class="inline js-auto-submit">
-          <option value="">{{ _('Index of all publishers') }}</option>
+          <option value="">{{ _('Index of all organizations') }}</option>
 	      {% for org_name, org_title in h.report__organization_list() %}
 		    {% if selected_org == org_name %}
 	           <option value="{{org_name}}" selected="selected"> {{org_title}} </option>
