@@ -232,6 +232,7 @@ def broken_report_option_combinations():
                             model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
                             model.TaskStatus.value == 'Server returned error: Service unavailable',\
                             model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
+                            model.TaskStatus.value == 'Unknown error: HTTP Error 404: NOT FOUND',\
                             model.TaskStatus.value == 'Could not make HEAD request')) \
                 .filter(model.Package.state == 'active') \
                 .filter(model.Resource.state == 'active') \
