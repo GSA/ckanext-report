@@ -93,16 +93,16 @@ def broken_link_report(organization, include_sub_organizations=False):
                  .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                  .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                  .filter(model.Group.is_organization == True) \
-                 .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
-                             model.TaskStatus.value == 'Connection timed out after 30s', \
-                             model.TaskStatus.value == 'Invalid URL',\
-                             model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
-                             model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
-                             model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
-                             model.TaskStatus.value == 'Server returned error: Service unavailable',\
-                             model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
-                             model.TaskStatus.value == 'Unknown error: HTTP Error 404: NOT FOUND',\
-                             model.TaskStatus.value == 'Could not make HEAD request')) \
+                 .filter(or_(func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 404'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Connection timed out after 30s'), \
+                            func.lower(model.TaskStatus.value) == func.lower('Invalid URL'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 400'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Internal server error on the remote server'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 403'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Service unavailable'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: 405 Method Not Allowed'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Unknown error: HTTP Error 404: NOT FOUND'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Could not make HEAD request'))) \
                  .filter(model.Package.state == 'active') \
                  .filter(model.Resource.state == 'active') \
                  .filter(model.ResourceGroup.state == 'active') \
@@ -142,16 +142,16 @@ def broken_link_report(organization, include_sub_organizations=False):
                      .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                      .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                      .filter(model.Group.is_organization == True) \
-                     .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
-                                 model.TaskStatus.value == 'Connection timed out after 30s', \
-                                 model.TaskStatus.value == 'Invalid URL',\
-                                 model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
-                                 model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
-                                 model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
-                                 model.TaskStatus.value == 'Server returned error: Service unavailable',\
-                                 model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
-                                 model.TaskStatus.value == 'Unknown error: HTTP Error 404: NOT FOUND',\
-                                 model.TaskStatus.value == 'Could not make HEAD request')) \
+                     .filter(or_(func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 404'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Connection timed out after 30s'), \
+                            func.lower(model.TaskStatus.value) == func.lower('Invalid URL'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 400'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Internal server error on the remote server'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 403'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Service unavailable'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: 405 Method Not Allowed'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Unknown error: HTTP Error 404: NOT FOUND'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Could not make HEAD request'))) \
                      .filter(model.Package.state == 'active') \
                      .filter(model.Resource.state == 'active') \
                      .filter(model.ResourceGroup.state == 'active') \
@@ -226,16 +226,16 @@ def broken_report_option_combinations():
                 .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                 .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                 .filter(model.Group.is_organization == True) \
-                .filter(or_(model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 404',\
-                            model.TaskStatus.value == 'Connection timed out after 30s', \
-                            model.TaskStatus.value == 'Invalid URL',\
-                            model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 400',\
-                            model.TaskStatus.value == 'Server returned error: Internal server error on the remote server',\
-                            model.TaskStatus.value == 'URL unobtainable: Server returned HTTP 403',\
-                            model.TaskStatus.value == 'Server returned error: Service unavailable',\
-                            model.TaskStatus.value == 'Server returned error: 405 Method Not Allowed',\
-                            model.TaskStatus.value == 'Unknown error: HTTP Error 404: NOT FOUND',\
-                            model.TaskStatus.value == 'Could not make HEAD request')) \
+                .filter(or_(func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 404'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Connection timed out after 30s'), \
+                            func.lower(model.TaskStatus.value) == func.lower('Invalid URL'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 400'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Internal server error on the remote server'),\
+                            func.lower(model.TaskStatus.value) == func.lower('URL unobtainable: Server returned HTTP 403'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: Service unavailable'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Server returned error: 405 Method Not Allowed'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Unknown error: HTTP Error 404: NOT FOUND'),\
+                            func.lower(model.TaskStatus.value) == func.lower('Could not make HEAD request'))) \
                 .filter(model.Package.state == 'active') \
                 .filter(model.Resource.state == 'active') \
                 .filter(model.ResourceGroup.state == 'active') \
