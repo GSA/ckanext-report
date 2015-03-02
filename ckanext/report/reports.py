@@ -160,7 +160,7 @@ def broken_link_report(organization, include_sub_organizations=False):
                       ('resource_id', row.id),
                       ('resource_position', row.position),
                       ('resource_url', row.url),
-                      ('reason', q2.first().value),
+                      ('reason', q2.first().value + ' ' + row.value),
                       ('failure_count', q.first().value),
                    )) )
                    
