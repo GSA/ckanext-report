@@ -227,8 +227,7 @@ def broken_report_option_combinations():
                 .filter(model.Package.state == 'active') \
                 .filter(model.Resource.state == 'active') \
                 .filter(model.ResourceGroup.state == 'active') \
-                .filter(model.Group.state == 'active') \
-                .filter(model.Group.name == 'test-org-3')
+                .filter(model.Group.state == 'active')
 
    yield {'organization': None,
              'include_sub_organizations': False
