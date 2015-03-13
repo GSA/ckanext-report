@@ -7,8 +7,10 @@ from ckan.lib.helpers import OrderedDict
 from ckanext.report import lib
 from sqlalchemy import func
 from sqlalchemy import or_
+from sqlalchemy import between
 from sqlalchemy import cast, Numeric
 import collections
+
 
 def tagless_report(organization, include_sub_organizations=False):
     '''
@@ -94,8 +96,8 @@ def broken_link_report(organization, include_sub_organizations=False):
                  .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                  .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                  .filter(model.Group.is_organization == True) \
-                 .filter(or_((cast(model.TaskStatus.value, Numeric(3)) >= 400 and cast(model.TaskStatus.value, Numeric(3)) <= 510) ,\
-                            (cast(model.TaskStatus.value, Numeric(3)) >= 512 and cast(model.TaskStatus.value, Numeric(3)) < 600) )) \
+                 .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
+                 .filter(cast(model.TaskStatus.value, Numeric(3)) != 511) \
                  .filter(model.TaskStatus.key == 'error_code' )\
                  .filter(model.Package.state == 'active') \
                  .filter(model.Resource.state == 'active') \
@@ -130,14 +132,15 @@ def broken_link_report(organization, include_sub_organizations=False):
         broken_links = []
         order = {'dataset_name':1, 'dataset_title':2, 'resource_id':3, 'resource_position':4, 'resource_url':5, 'reason':6, 'failure_count':7}
 
+        
         sql = model.Session.query(model.Package.name, model.Package.title, model.Resource.id, model.Resource.position, model.Resource.url, model.TaskStatus.value, model.TaskStatus.entity_id) \
                      .join(model.Group, model.Group.id == model.Package.owner_org) \
                      .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
                      .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                      .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                      .filter(model.Group.is_organization == True) \
-                     .filter(or_((cast(model.TaskStatus.value, Numeric(3)) >= 400 and cast(model.TaskStatus.value, Numeric(3)) <= 510) ,\
-                            (cast(model.TaskStatus.value, Numeric(3)) >= 512 and cast(model.TaskStatus.value, Numeric(3)) < 600) )) \
+                     .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
+                     .filter(cast(model.TaskStatus.value, Numeric(3)) != 511) \
                      .filter(model.TaskStatus.key == 'error_code' )\
                      .filter(model.Package.state == 'active') \
                      .filter(model.Resource.state == 'active') \
@@ -163,13 +166,14 @@ def broken_link_report(organization, include_sub_organizations=False):
                       ('reason', q2.first().value),
                       ('failure_count', q.first().value),
                    )) )
+                 
                    
         sql = sql.subquery()
-        q1 = model.Session.query(func.count(sql.c.name).label('total_brkn_dataset'), func.count(sql.c.position).label('total_brkn_link')).first()
-
+        
+        q1 = model.Session.query(func.count(sql.c.name.distinct()).label('total_brkn_dataset'), func.count(sql.c.id).label('total_brkn_link')).first()
+       
         total_brkn_dataset = q1.total_brkn_dataset	     
         total_brkn_link = q1.total_brkn_link
-          
         
     # Number of total resources and package
     q = model.Session.query(model.Package)\
@@ -217,13 +221,14 @@ def broken_report_option_combinations():
                 .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
                 .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                 .filter(model.Group.is_organization == True) \
-                .filter(or_((cast(model.TaskStatus.value, Numeric(3)) >= 400 and cast(model.TaskStatus.value, Numeric(3)) <= 510) ,\
-                            (cast(model.TaskStatus.value, Numeric(3)) >= 512 and cast(model.TaskStatus.value, Numeric(3)) < 600) )) \
+                .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
+                .filter(cast(model.TaskStatus.value, Numeric(3)) != 511) \
                 .filter(model.TaskStatus.key == 'error_code' )\
                 .filter(model.Package.state == 'active') \
                 .filter(model.Resource.state == 'active') \
                 .filter(model.ResourceGroup.state == 'active') \
-                .filter(model.Group.state == 'active')
+                .filter(model.Group.state == 'active') \
+                .filter(model.Group.name == 'test-org-3')
 
    yield {'organization': None,
              'include_sub_organizations': False
