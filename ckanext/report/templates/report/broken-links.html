@@ -40,7 +40,7 @@
 	    </tr>
 	</thead>
 	<tbody>
-	 	{% for row in  record.table %}
+	 	{% for row in  record.table[:1000] %}
 	     	<tr>
 				<td> 
 					<a href="{{h.url_for(controller='package', action='read', id=row.dataset_name)}}"> {{ row.dataset_title }} </a>
@@ -58,5 +58,6 @@
 	</tbody>
 	{% endif %}
 </table>
+Note: This table is truncated to show top 1000 records only.
 {% endif %}
 {% endfor %}
