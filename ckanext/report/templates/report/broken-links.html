@@ -4,7 +4,7 @@
     <li>Broken datasets: {{ record.num_broken_packages }} / {{ record.num_packages }} ({{ record.broken_package_percent }} %) </li>
     <li>Broken links: {{ record.num_broken_resources }} / {{ record.num_resources }} ({{ record.broken_resource_percent }} %) </li>
 </ul>
-
+Note: This table is truncated to show top 1000 records only. Download CSV/JSON for full list of records.
 <table class="table table-bordered table-condensed tablesorter" id="report-table" style="width: 100%; table-layout:fixed; margin-top: 8px;">
 	{% if not selected_org %}
     <thead>
@@ -58,6 +58,6 @@
 	</tbody>
 	{% endif %}
 </table>
-Note: This table is truncated to show top 1000 records only.
+Note: This table is truncated to show top 1000 records only. Download CSV/JSON for full list of records.
 {% endif %}
 {% endfor %}
