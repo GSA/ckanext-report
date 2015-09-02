@@ -105,7 +105,9 @@ class ReportController(t.BaseController):
                 for data in c.data:     
                   return make_csv_from_dicts(data['table'])
             elif format == 'json':
+                filename = 'report_%s.json' % report.generate_key(c.options).replace('?', '_')
                 t.response.headers['Content-Type'] = 'application/json'
+                t.response.headers['Content-Disposition'] = str('attachment; filename=%s' % (filename))
                 result = OrderedDict()
                 result['generated_at'] = c.report_date
                 for data in c.data:
