@@ -11,6 +11,9 @@ from sqlalchemy import between
 from sqlalchemy import cast, Numeric
 import collections
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 
 def tagless_report(organization, include_sub_organizations=False):
     '''
@@ -70,14 +73,14 @@ def broken_link_report(organization, include_sub_organizations=False):
         sql = model.Session.query(model.Group.name, func.count(model.Package.id.distinct()).label('total_grp_pkg_count'), \
                func.count(model.Resource.id.distinct()).label('total_grp_res_cnt')) \
                .join(model.Package, model.Group.id == model.Package.owner_org) \
-               .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-               .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+               .join(model.Resource, model.Resource.package_id == model.Package.id) \
                .filter(model.Group.is_organization == True) \
                .filter(model.Package.state == 'active') \
                .filter(model.Resource.state == 'active') \
-               .filter(model.ResourceGroup.state == 'active') \
                .filter(model.Group.state == 'active') \
                .group_by(model.Group.name)
+
+        pp.pprint(sql)
 
         for row in sql:
             grp_totals[row.name] =  OrderedDict((
@@ -92,8 +95,7 @@ def broken_link_report(organization, include_sub_organizations=False):
                   func.count(model.Package.name.distinct()).label('dataset_cnt'), \
                   func.count(model.Group.name).label('broken_link_cnt')) \
                  .join(model.Package, model.Group.id == model.Package.owner_org) \
-                 .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-                 .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                 .join(model.Resource, model.Resource.package_id == model.Package.id) \
                  .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                  .filter(model.Group.is_organization == True) \
                  .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
@@ -101,7 +103,6 @@ def broken_link_report(organization, include_sub_organizations=False):
                  .filter(model.TaskStatus.key == 'error_code' )\
                  .filter(model.Package.state == 'active') \
                  .filter(model.Resource.state == 'active') \
-                 .filter(model.ResourceGroup.state == 'active') \
                  .filter(model.Group.state == 'active') \
                  .group_by(model.Group.name, model.Group.title) \
                  .order_by(model.Group.title)
@@ -185,11 +186,9 @@ def broken_link_report(organization, include_sub_organizations=False):
     num_packages = q.count()
 
     q = q.join(model.Group, model.Group.id == model.Package.owner_org)\
-         .join(model.ResourceGroup) \
          .join(model.Resource) \
          .filter(model.Package.state == 'active') \
          .filter(model.Resource.state == 'active') \
-         .filter(model.ResourceGroup.state == 'active') \
          .filter(model.Group.state == 'active')
 
     num_res = q.count()
@@ -217,8 +216,7 @@ def tagless_report_option_combinations():
 def broken_report_option_combinations():
    sql = model.Session.query(model.Group.name.distinct().label('organization')) \
                 .join(model.Package, model.Group.id == model.Package.owner_org) \
-                .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-                .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                .join(model.Resource, model.Resource.package_id == model.Package.id) \
                 .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                 .filter(model.Group.is_organization == True) \
                 .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
@@ -226,7 +224,6 @@ def broken_report_option_combinations():
                 .filter(model.TaskStatus.key == 'error_code' )\
                 .filter(model.Package.state == 'active') \
                 .filter(model.Resource.state == 'active') \
-                .filter(model.ResourceGroup.state == 'active') \
                 .filter(model.Group.state == 'active')
 
    yield {'organization': None,
