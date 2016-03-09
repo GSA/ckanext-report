@@ -136,8 +136,7 @@ def broken_link_report(organization, include_sub_organizations=False):
         
         sql = model.Session.query(model.Package.name, model.Package.title, model.Resource.id, model.Resource.position, model.Resource.url, model.TaskStatus.value, model.TaskStatus.entity_id) \
                      .join(model.Group, model.Group.id == model.Package.owner_org) \
-                     .join(model.ResourceGroup, model.ResourceGroup.package_id == model.Package.id) \
-                     .join(model.Resource, model.Resource.resource_group_id == model.ResourceGroup.id) \
+                     .join(model.Resource, model.Resource.package_id == model.Package.id) \
                      .join(model.TaskStatus, model.TaskStatus.entity_id == model.Resource.id) \
                      .filter(model.Group.is_organization == True) \
                      .filter(between(cast(model.TaskStatus.value, Numeric(3)), 400, 600)) \
@@ -145,7 +144,6 @@ def broken_link_report(organization, include_sub_organizations=False):
                      .filter(model.TaskStatus.key == 'error_code' )\
                      .filter(model.Package.state == 'active') \
                      .filter(model.Resource.state == 'active') \
-                     .filter(model.ResourceGroup.state == 'active') \
                      .filter(model.Group.state == 'active') \
         			 .filter(model.Group.name == organization)
  
